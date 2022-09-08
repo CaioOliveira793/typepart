@@ -50,6 +50,6 @@
 		"src/**/*",
 		"test/**/*",
 		"jest.*.ts",
-		"jest.*.js",
+		"jest.*.js"
 	]
 }
