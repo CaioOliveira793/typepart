@@ -1,4 +1,4 @@
-import { MultpartFile } from "./MultpartTypes";
+import { MultipartFile } from "./MultipartTypes";
 
 
 export interface FileResultProps {
@@ -36,7 +36,7 @@ export class FileResult {
 		this.filepath = dto.filepath;
 	}
 
-	public static fromMultpartFile(file: MultpartFile, ext: FileResultExt): FileResult {
+	public static fromMultipartFile(file: MultipartFile, ext: FileResultExt): FileResult {
 		return new FileResult({
 			originalname: file.filename,
 			encoding: file.encoding,

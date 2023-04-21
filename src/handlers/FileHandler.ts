@@ -1,13 +1,13 @@
-import { MultpartFile, MultpartConsumer, MultpartErrorKind, MultpartParseError } from "../MultpartTypes";
+import { MultipartFile, MultipartConsumer, MultipartErrorKind, MultipartParseError } from "../MultipartTypes";
 
 
 export class FileHandler<T, Metadata> {
 	constructor(
-		private readonly consumer: MultpartConsumer<T, Metadata>,
+		private readonly consumer: MultipartConsumer<T, Metadata>,
 		private readonly meta: Metadata
 	) { }
 
-	public async handleFile(file: MultpartFile): Promise<void> {
+	public async handleFile(file: MultipartFile): Promise<void> {
 		this.files.push(file);
 		try {
 			const consumedFile = await this.consumer.processFile(file, this.meta);
@@ -30,11 +30,11 @@ export class FileHandler<T, Metadata> {
 	public getConsumedFiles(): T[] {
 		const truncated = this.files.some(file => file.stream.truncated);
 		if (truncated)
-			throw new MultpartParseError(MultpartErrorKind.TruncatedFile);
+			throw new MultipartParseError(MultipartErrorKind.TruncatedFile);
 
 		return this.consumedFiles;
 	}
 
 	private readonly consumedFiles: T[] = [];
-	private readonly files: MultpartFile[] = [];
+	private readonly files: MultipartFile[] = [];
 }

@@ -1,4 +1,4 @@
-import { MultpartField, GrupedFileds, MultpartParseError, MultpartErrorKind } from "../MultpartTypes";
+import { MultipartField, GrupedFileds, MultipartParseError, MultipartErrorKind } from "../MultipartTypes";
 
 
 export interface FieldHandlerOptions {
@@ -18,12 +18,12 @@ export class FieldHandler {
 		this.options = { ...DEFAULT_FIELD_HANDLER_OPTIONS, ...opt };
 	}
 
-	handleField(field: MultpartField<string>): void {
+	handleField(field: MultipartField<string>): void {
 		if (!this.options.allowTruncateFieldName && field.isNameTruncated)
-			throw new MultpartParseError(MultpartErrorKind.TruncatedFieldKey);
+			throw new MultipartParseError(MultipartErrorKind.TruncatedFieldKey);
 
 		if (!this.options.allowTruncateFieldValue && field.isValueTruncated)
-			throw new MultpartParseError(MultpartErrorKind.TruncatedFieldValue);
+			throw new MultipartParseError(MultipartErrorKind.TruncatedFieldValue);
 
 		this.fields[field.name] = field.value;
 	}

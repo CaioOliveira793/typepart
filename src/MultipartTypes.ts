@@ -1,7 +1,7 @@
 import { Readable } from "node:stream";
 
 
-export interface MultpartField<T> {
+export interface MultipartField<T> {
 	name: string;
 	value: T;
 	isNameTruncated: boolean;
@@ -10,12 +10,12 @@ export interface MultpartField<T> {
 	mimetype: string;
 }
 
-export interface MultpartFileStream extends Readable {
+export interface MultipartFileStream extends Readable {
 	truncated: boolean;
 }
 
-export interface MultpartFile {
-	stream: MultpartFileStream;
+export interface MultipartFile {
+	stream: MultipartFileStream;
 	filename: string;
 	fieldname: string;
 	encoding: string;
@@ -31,30 +31,30 @@ export type Headers = Record<string, string>;
  * _possibly_ do a rollback in the operation once done in the file.
  *
  * The file handling **must** be done in one the following ways:
- * - reading the `MultpartFile.stream` by pipeing to some write stream
+ * - reading the `MultipartFile.stream` by pipeing to some write stream
  * or simply `stream.resume`
  * - throwing an error (the file consuption is done by the `FileHandler`
- * discarting the `MultpartFile` contents)
+ * discarting the `MultipartFile` contents)
  *
  * After processing, a `ConsumedFileResult` **must** be returned with the purprose
  * of identifing the handled file in a rollback case
  *
- * If an error is thrown, it will bublle up to the `parseMultpart` caller,
+ * If an error is thrown, it will bublle up to the `parseMultipart` caller,
  * beeing the responsable to call (if wanted) `FileHandler.rollbackAllFiles`,
  * interruping the processing (`stream.unpipe`), discarting all the remaning
- * multpart file contents (`stream.resume`) and calling `MultpartConsumer.rollbackFile`.
+ * multpart file contents (`stream.resume`) and calling `MultipartConsumer.rollbackFile`.
  *
  * Rollback **should** undo any operation done with the file, identified by
- * the `ConsumedFileResult`. Any error thrown is bublled up to the `parseMultpart`
+ * the `ConsumedFileResult`. Any error thrown is bublled up to the `parseMultipart`
  * caller.
  */
-export interface MultpartConsumer<ConsumedFileResult, Metadata = undefined> {
+export interface MultipartConsumer<ConsumedFileResult, Metadata = undefined> {
 	/**
 	 * Process the file consuming its contents.
-	 * @param file `MultpartFile` to be consumed
+	 * @param file `MultipartFile` to be consumed
 	 * @returns `ConsumedFileResult`
 	 */
-	processFile(file: MultpartFile, metadata: Metadata): Promise<ConsumedFileResult>;
+	processFile(file: MultipartFile, metadata: Metadata): Promise<ConsumedFileResult>;
 
 	/**
 	 * May rollback the previous file processing.
@@ -65,12 +65,12 @@ export interface MultpartConsumer<ConsumedFileResult, Metadata = undefined> {
 
 export type GrupedFileds = Record<string, string>;
 
-export interface MultpartResult<Fields extends GrupedFileds, ConsumedFileResult> {
+export interface MultipartResult<Fields extends GrupedFileds, ConsumedFileResult> {
 	fields: Fields;
 	files: ConsumedFileResult[];
 }
 
-export enum MultpartErrorKind {
+export enum MultipartErrorKind {
 	PartCountExceded = 'PART_COUNT_EXCEDED',
 	FieldCountExceded = 'FIELD_COUNT_EXCEDED',
 	FileCountExceded = 'FILE_COUNT_EXCEDED',
@@ -81,10 +81,10 @@ export enum MultpartErrorKind {
 	TruncatedFieldValue = 'TRUNCATED_FIELD_VALUE',
 }
 
-export class MultpartParseError extends Error {
-	public readonly kind: MultpartErrorKind;
+export class MultipartParseError extends Error {
+	public readonly kind: MultipartErrorKind;
 
-	constructor(kind: MultpartErrorKind) {
+	constructor(kind: MultipartErrorKind) {
 		super(`An ${kind} error ocurred parsing multpart data`);
 		this.kind = kind;
 	}

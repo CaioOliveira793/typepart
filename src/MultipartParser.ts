@@ -1,6 +1,6 @@
 import { Readable } from "node:stream";
 import Busboy from 'busboy';
-import { MultpartErrorKind, MultpartParseError, GrupedFileds, MultpartFileStream, MultpartResult, Headers } from "./MultpartTypes";
+import { MultipartErrorKind, MultipartParseError, GrupedFileds, MultipartFileStream as MultipartFileStream, MultipartResult, Headers } from "./MultipartTypes";
 import { FieldHandler, FieldHandlerOptions } from "./handlers/FieldHandler";
 import { FileHandler } from './handlers/FileHandler';
 
@@ -20,7 +20,7 @@ const DEFAULT_LIMIT_OPTIONS: LimitOptions = {
 	files: 30
 }
 
-export interface ParseMultpartOptions extends FieldHandlerOptions, LimitOptions { }
+export interface ParseMultipartOptions extends FieldHandlerOptions, LimitOptions { }
 
 type FieldListener = (
 	name: string,
@@ -33,7 +33,7 @@ type FieldListener = (
 
 type FileListener = (
 	fieldname: string,
-	stream: MultpartFileStream,
+	stream: MultipartFileStream,
 	filename: string,
 	encoding: string,
 	mimetype: string
@@ -52,35 +52,35 @@ function createFieldListerner(fieldHandler: FieldHandler, onError: (err: unknown
 function createFileListener<T, Metadata>(
 	fileHandler: FileHandler<T, Metadata>,
 	filePromises: Promise<void>[],
-	rejectMultpart: (err: unknown) => void
+	rejectMultipart: (err: unknown) => void
 ): FileListener {
 	return (fieldname, stream, filename, encoding, mimetype) => {
 		filePromises.push(new Promise((resolve, rejectFile) => {
 			fileHandler.handleFile({ encoding, filename, fieldname, mimetype, stream })
 				.then(resolve)
 				.catch(err => {
-					rejectMultpart(err);
+					rejectMultipart(err);
 					rejectFile(err);
 				});
 		}));
 	}
 }
 
-export interface ParseMultpartInput<T, Metadata> {
+export interface ParseMultipartInput<T, Metadata> {
 	headers: Headers;
 	request: Readable;
 	fieldHandler: FieldHandler;
 	fileHandler: FileHandler<T, Metadata>;
-	options: ParseMultpartOptions;
+	options: ParseMultipartOptions;
 }
 
-export async function parseMultpart<T, Metadata>({
+export async function parseMultipart<T, Metadata>({
 	fieldHandler,
 	fileHandler,
 	options,
 	headers,
 	request,
-}: ParseMultpartInput<T, Metadata>): Promise<MultpartResult<GrupedFileds, T>> {
+}: ParseMultipartInput<T, Metadata>): Promise<MultipartResult<GrupedFileds, T>> {
 	const busboy = new Busboy({
 		headers: headers,
 		limits: { ...DEFAULT_LIMIT_OPTIONS, ...options },
@@ -96,17 +96,17 @@ export async function parseMultpart<T, Metadata>({
 
 		busboy.on(
 			'partsLimit',
-			() => reject(new MultpartParseError(MultpartErrorKind.PartCountExceded))
+			() => reject(new MultipartParseError(MultipartErrorKind.PartCountExceded))
 		);
 
 		busboy.on(
 			'filesLimit',
-			() => reject(new MultpartParseError(MultpartErrorKind.FileCountExceded))
+			() => reject(new MultipartParseError(MultipartErrorKind.FileCountExceded))
 		);
 
 		busboy.on(
 			'fieldsLimit',
-			() => reject(new MultpartParseError(MultpartErrorKind.FieldCountExceded))
+			() => reject(new MultipartParseError(MultipartErrorKind.FieldCountExceded))
 		);
 
 		busboy.on('finish', (err: unknown) => {
@@ -132,4 +132,3 @@ export async function parseMultpart<T, Metadata>({
 		request.resume();
 	}
 }
-
